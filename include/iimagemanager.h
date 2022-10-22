@@ -1,5 +1,5 @@
-#ifndef IMAGE_API_H 
-#define IMAGE_API_H 
+#ifndef IIMAGE_MANAGER_H 
+#define IIMAGE_MANAGER_H 
 
 /**
  * @brief The image handler to be userd by the manager.
@@ -114,4 +114,4 @@ ImageOperationResult get_compatibility_path (
     char** path
     );
 
-#endif // IMAGE_API_H 
+#endif // IIMAGE_MANAGER_H 

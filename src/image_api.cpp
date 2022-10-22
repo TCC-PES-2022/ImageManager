@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <iostream>
 
-#include "image_api.h"
+#include "iimagemanager.h"
 #include "tinyxml2.h"
 #include "gcrypt.h"
 

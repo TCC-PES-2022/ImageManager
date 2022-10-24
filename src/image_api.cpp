@@ -11,7 +11,7 @@
 #include "tinyxml2.h"
 #include "gcrypt.h"
 
-#define IMAGE_DIR "images"
+#define RELATIVE_IMAGE_DIR "/pes/images"
 
 #define COMPATIBILITY_FILE_PN "00000000"
 #define COMPATIBILITY_FILE "compatibility.xml"
@@ -23,6 +23,7 @@
 
 struct ImageHandler
 {
+    std::string imageDir;
     std::unordered_map<std::string, std::string> image_map;
     char **images = NULL;
     int get_list_size = 0;
@@ -102,13 +103,15 @@ ImageOperationResult create_handler(ImageHandlerPtr *handler)
 
     *handler = &singletonHandler;
 
+    singletonHandler.imageDir = std::string(getenv("HOME")) + std::string(RELATIVE_IMAGE_DIR);
+
     // Create image directory if it does not exist
     struct stat buffer;
-    if (stat(IMAGE_DIR, &buffer) != 0)
+    if (stat(singletonHandler.imageDir.c_str(), &buffer) != 0)
     {
-        if (mkdir(IMAGE_DIR, S_IRWXU | S_IRWXG | S_IRWXO) != 0)
+        if (mkdir(singletonHandler.imageDir.c_str(), S_IRWXU | S_IRWXG | S_IRWXO) != 0)
         {
-            printf("[ERROR] Could create %s directory", IMAGE_DIR);
+            printf("[ERROR] Could create %s directory", singletonHandler.imageDir.c_str());
             return IMAGE_OPERATION_ERROR;
         }
     }
@@ -117,11 +120,11 @@ ImageOperationResult create_handler(ImageHandlerPtr *handler)
 
     // Load image list from disk
     struct dirent *de;
-    DIR *dr = opendir(IMAGE_DIR);
+    DIR *dr = opendir(singletonHandler.imageDir.c_str());
 
     if (dr == NULL)
     {
-        printf("[ERROR] Could not open %s directory", IMAGE_DIR);
+        printf("[ERROR] Could not open %s directory", singletonHandler.imageDir.c_str());
         return IMAGE_OPERATION_ERROR;
     }
 
@@ -131,7 +134,7 @@ ImageOperationResult create_handler(ImageHandlerPtr *handler)
         {
             std::string fileName = de->d_name;
             std::string baseName = fileName.substr(0, fileName.find_last_of("."));
-            std::string filePath = std::string(IMAGE_DIR) + "/" + fileName;
+            std::string filePath = singletonHandler.imageDir + "/" + fileName;
 
             bool isValidChecksum = false;
             if (check_checksum(filePath.c_str(), &isValidChecksum) == IMAGE_OPERATION_OK && isValidChecksum == true)
@@ -183,7 +186,7 @@ ImageOperationResult import_image(ImageHandlerPtr handler, const char *path, cha
     if (isXMLFile == true)
     {
         FILE *fpOrig = fopen(path, "r");
-        std::string destFile = std::string(IMAGE_DIR) + std::string("/") + std::string(COMPATIBILITY_FILE);
+        std::string destFile = singletonHandler.imageDir + std::string("/") + std::string(COMPATIBILITY_FILE);
         FILE *fpDest = fopen(destFile.c_str(), "a+");
         fseek(fpDest, 0, SEEK_END);
         bool firstTime = (ftell(fpDest) == 0);
@@ -355,7 +358,7 @@ ImageOperationResult import_image(ImageHandlerPtr handler, const char *path, cha
             pnStr = pnStr + hex;
         }
 
-        std::string destPath = std::string(IMAGE_DIR) + std::string("/") + pnStr + std::string(".bin");
+        std::string destPath = singletonHandler.imageDir + std::string("/") + pnStr + std::string(".bin");
 
         // Copy file
         char buffer[1024];
@@ -502,7 +505,7 @@ ImageOperationResult get_compatibility_path(
     //       but we could also just copy the ones that match the PN list (and that looks better)
 
     // Copy compatibility file to temp directory
-    std::string xmlPath = std::string(IMAGE_DIR) + std::string("/") + COMPATIBILITY_FILE;
+    std::string xmlPath = singletonHandler.imageDir + std::string("/") + COMPATIBILITY_FILE;
     FILE *fpOrig = fopen(xmlPath.c_str(), "rb");
     FILE *fpDest = fopen(CUSTOM_COMPATIBILITY_FILE, "wb");
 

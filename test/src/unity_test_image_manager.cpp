@@ -5,9 +5,9 @@
 
 #include <fstream>
 
-#include "image_api.h"
+#include "iimagemanager.h"
 
-#define IMAGE_DIR "images"
+#define RELATIVE_IMAGE_DIR "/pes/images"
 #define COMPATIBILITY_FILE "compatibility.xml"
 
 #define CUSTOM_COMPATIBILITY_FILE "/tmp/compatibility.xml"
@@ -34,6 +34,7 @@ protected:
     void SetUp() override
     {
         ASSERT_EQ(IMAGE_OPERATION_OK, create_handler(&handler));
+        imageDir = std::string(getenv("HOME")) + std::string(RELATIVE_IMAGE_DIR);
     }
 
     void TearDown() override
@@ -42,6 +43,7 @@ protected:
     }
 
     ImageHandlerPtr handler;
+    std::string imageDir;
 };
 
 TEST_F(ImageManagerTest, ImportImageBinaryTest)
@@ -55,11 +57,11 @@ TEST_F(ImageManagerTest, ImportImageBinaryTest)
 
     // Check if file was imported
     struct dirent *de;
-    DIR *dr = opendir(IMAGE_DIR);
+    DIR *dr = opendir(imageDir.c_str());
 
     if (dr == NULL)
     {
-        FAIL() << "Could not open " << IMAGE_DIR << " directory";
+        FAIL() << "Could not open " << imageDir << " directory";
     }
 
     bool found = false;
@@ -102,11 +104,11 @@ TEST_F(ImageManagerTest, ImportMultipleImageBinaryTest)
 
     // Check if file was imported
     struct dirent *de;
-    DIR *dr = opendir(IMAGE_DIR);
+    DIR *dr = opendir(imageDir.c_str());
 
     if (dr == NULL)
     {
-        FAIL() << "Could not open " << IMAGE_DIR << " directory";
+        FAIL() << "Could not open " << imageDir << " directory";
     }
 
     bool found1 = false;
@@ -160,11 +162,11 @@ TEST_F(ImageManagerTest, ImportCompatibilityFileTest)
 
     // Check if file was imported
     struct dirent *de;
-    DIR *dr = opendir(IMAGE_DIR);
+    DIR *dr = opendir(imageDir.c_str());
 
     if (dr == NULL)
     {
-        FAIL() << "Could not open " << IMAGE_DIR << " directory";
+        FAIL() << "Could not open " << imageDir << " directory";
     }
 
     bool found = false;
@@ -207,11 +209,11 @@ TEST_F(ImageManagerTest, ImportMultipleCompatibilityFileTest)
 
     // Check if file was imported
     struct dirent *de;
-    DIR *dr = opendir(IMAGE_DIR);
+    DIR *dr = opendir(imageDir.c_str());
 
     if (dr == NULL)
     {
-        FAIL() << "Could not open " << IMAGE_DIR << " directory";
+        FAIL() << "Could not open " << imageDir << " directory";
     }
 
     bool found = false;
@@ -249,11 +251,11 @@ TEST_F(ImageManagerTest, RemovePnTest)
 
     // Check if file was removed
     struct dirent *de;
-    DIR *dr = opendir(IMAGE_DIR);
+    DIR *dr = opendir(imageDir.c_str());
 
     if (dr == NULL)
     {
-        FAIL() << "Could not open " << IMAGE_DIR << " directory";
+        FAIL() << "Could not open " << imageDir << " directory";
     }
 
     bool found = false;
@@ -321,7 +323,8 @@ TEST_F(ImageManagerTest, GetImagePathTest)
     char *path = NULL;
     ASSERT_EQ(get_image_path(handler, pn, &path), IMAGE_OPERATION_OK);
 
-    ASSERT_STREQ(path, "images/00000001.bin");
+    std::string expectedPath = imageDir + "/" + pn + ".bin";
+    ASSERT_STREQ(path, expectedPath.c_str());
 }
 
 TEST_F(ImageManagerTest, GetCompatibilityPathTest)

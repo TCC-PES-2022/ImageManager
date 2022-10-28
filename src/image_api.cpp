@@ -199,6 +199,7 @@ ImageOperationResult import_image(ImageHandlerPtr handler, const char *path, cha
         if (firstTime)
         {
             // TODO: Copy file needs to be a function
+            fseek(fpOrig, 0, SEEK_SET);
             char buffer[1024];
             size_t bytesRead = 0;
             while ((bytesRead = fread(buffer, 1, 1024, fpOrig)) > 0)
@@ -310,6 +311,7 @@ ImageOperationResult import_image(ImageHandlerPtr handler, const char *path, cha
                 return IMAGE_OPERATION_ERROR;
             }
 
+            fseek(fpTmp, 0, SEEK_SET);
             char buffer[1024];
             size_t bytesRead = 0;
             while ((bytesRead = fread(buffer, 1, 1024, fpTmp)) > 0)
@@ -322,7 +324,7 @@ ImageOperationResult import_image(ImageHandlerPtr handler, const char *path, cha
 
         fclose(fpOrig);
         fclose(fpDest);
-        handler->image_map[COMPATIBILITY_FILE_PN] = destFile;
+        // handler->image_map[COMPATIBILITY_FILE_PN] = destFile;
 
         if (part_number != NULL)
         {
@@ -361,6 +363,7 @@ ImageOperationResult import_image(ImageHandlerPtr handler, const char *path, cha
         std::string destPath = singletonHandler.imageDir + std::string("/") + pnStr + std::string(".bin");
 
         // Copy file
+        fseek(fpOrig, 0, SEEK_SET);
         char buffer[1024];
         FILE *fpDest = fopen(destPath.c_str(), "wb");
         if (fpDest == NULL)
@@ -451,7 +454,7 @@ ImageOperationResult get_images(
         handler->images = NULL;
     }
 
-    handler->get_list_size = handler->image_map.size() - 1;
+    handler->get_list_size = handler->image_map.size();
     handler->images = (char **)malloc(sizeof(char *) * handler->get_list_size);
     int i = 0;
     for (std::unordered_map<std::string, std::string>::iterator it = handler->image_map.begin();
@@ -514,6 +517,7 @@ ImageOperationResult get_compatibility_path(
         return IMAGE_OPERATION_ERROR;
     }
 
+    fseek(fpOrig, 0, SEEK_SET);
     char buffer[1024];
     size_t bytesRead = 0;
     while ((bytesRead = fread(buffer, 1, 1024, fpOrig)) > 0)

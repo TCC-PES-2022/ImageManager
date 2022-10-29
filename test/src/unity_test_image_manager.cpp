@@ -331,7 +331,9 @@ TEST_F(ImageManagerTest, GetCompatibilityPathTest)
 {
     ASSERT_EQ(import_image(handler, "origin_images/load1.bin", NULL), IMAGE_OPERATION_OK);
 
-    const char *pnlist[] = {"00000001"};
+    char **pnlist = (char **)malloc(sizeof(char *));
+    pnlist[0] = (char *)malloc(sizeof(char) * 9);
+    strcpy(pnlist[0], "00000001");
 
     char *path = NULL;
     ASSERT_EQ(get_compatibility_path(handler, pnlist, 1, &path), IMAGE_OPERATION_OK);
@@ -341,4 +343,37 @@ TEST_F(ImageManagerTest, GetCompatibilityPathTest)
     std::ifstream file(path);
     std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     ASSERT_STREQ(content.c_str(), CUSTOM_COMPATIBILITY_CONTENT);
+
+    free(pnlist[0]);
+    free(pnlist);
+}
+
+TEST_F(ImageManagerTest, GetCompatibilityPathWithZerosTest)
+{
+    ASSERT_EQ(import_image(handler, "origin_images/load1.bin", NULL), IMAGE_OPERATION_OK);
+
+    char **pnlist = (char **)malloc(4*sizeof(char *));
+    pnlist[0] = (char *)malloc(sizeof(char) * 9);
+    pnlist[1] = (char *)malloc(sizeof(char) * 9);
+    pnlist[2] = (char *)malloc(sizeof(char) * 9);
+    pnlist[3] = (char *)malloc(sizeof(char) * 9);
+    strcpy(pnlist[0], "00000001");
+    strcpy(pnlist[1], "00000000");
+    strcpy(pnlist[2], "00000000");
+    strcpy(pnlist[3], "00000000");
+
+    char *path = NULL;
+    ASSERT_EQ(get_compatibility_path(handler, pnlist, 4, &path), IMAGE_OPERATION_OK);
+    ASSERT_STREQ(path, CUSTOM_COMPATIBILITY_FILE);
+
+    //Assert content
+    std::ifstream file(path);
+    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    ASSERT_STREQ(content.c_str(), CUSTOM_COMPATIBILITY_CONTENT);
+
+    free(pnlist[0]);
+    free(pnlist[1]);
+    free(pnlist[2]);
+    free(pnlist[3]);
+    free(pnlist);
 }

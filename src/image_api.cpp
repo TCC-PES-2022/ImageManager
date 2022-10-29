@@ -495,7 +495,7 @@ ImageOperationResult get_image_path(ImageHandlerPtr handler, const char *part_nu
 
 ImageOperationResult get_compatibility_path(
     ImageHandlerPtr handler,
-    const char **part_numbers,
+    char **part_numbers,
     int list_size,
     char **path)
 {

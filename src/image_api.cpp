@@ -382,7 +382,7 @@ ImageOperationResult import_image(ImageHandlerPtr handler, const char *path, cha
         fclose(fpDest);
 
         isValidChecksum = false;
-        if (check_checksum(path, &isValidChecksum) != IMAGE_OPERATION_OK ||
+        if (check_checksum(destPath.c_str(), &isValidChecksum) != IMAGE_OPERATION_OK ||
             isValidChecksum == false)
         {
             unlink(destPath.c_str());

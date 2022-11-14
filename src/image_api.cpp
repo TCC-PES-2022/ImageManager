@@ -134,6 +134,7 @@ ImageOperationResult create_handler(ImageHandlerPtr *handler)
         {
             std::string fileName = de->d_name;
             std::string baseName = fileName.substr(0, fileName.find_last_of("."));
+            baseName = fileName.substr(0, fileName.find_first_of("_"));
             std::string filePath = singletonHandler.imageDir + "/" + fileName;
 
             bool isValidChecksum = false;
@@ -360,7 +361,12 @@ ImageOperationResult import_image(ImageHandlerPtr handler, const char *path, cha
             pnStr = pnStr + hex;
         }
 
-        std::string destPath = singletonHandler.imageDir + std::string("/") + pnStr + std::string(".bin");
+        size_t fileSize = 0;
+        fseek(fpOrig, 0, SEEK_END);
+        fileSize = ftell(fpOrig);
+        fseek(fpOrig, 0, SEEK_SET);
+
+        std::string destPath = singletonHandler.imageDir + std::string("/") + pnStr + std::string("_") + std::to_string(fileSize) + std::string(".bin");
 
         // Copy file
         fseek(fpOrig, 0, SEEK_SET);

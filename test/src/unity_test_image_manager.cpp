@@ -64,8 +64,18 @@ TEST_F(ImageManagerTest, ImportImageBinaryTest)
         FAIL() << "Could not open " << imageDir << " directory";
     }
 
+    FILE *file = fopen("origin_images/load1.bin", "r");
+    ASSERT_NE(file, nullptr);
+
+    size_t fileSize = 0;
+    fseek(file, 0, SEEK_END);
+    fileSize = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    fclose(file);
+
     bool found = false;
-    std::string fileName = std::string(pn) + ".bin";
+    std::string fileName = std::string(pn) + std::string("_") + std::to_string(fileSize) + ".bin";
     while ((de = readdir(dr)) != NULL)
     {
         if (de->d_type == DT_REG && strcmp(de->d_name, fileName.c_str()) == 0)
@@ -111,12 +121,36 @@ TEST_F(ImageManagerTest, ImportMultipleImageBinaryTest)
         FAIL() << "Could not open " << imageDir << " directory";
     }
 
+    FILE *file1 = fopen("origin_images/load1.bin", "r");
+    FILE *file2 = fopen("origin_images/load2.bin", "r");
+    FILE *file3 = fopen("origin_images/load3.bin", "r");
+    ASSERT_NE(file1, nullptr);
+    ASSERT_NE(file2, nullptr);
+    ASSERT_NE(file3, nullptr);
+
+    size_t fileSize1 = 0;
+    size_t fileSize2 = 0;
+    size_t fileSize3 = 0;
+    fseek(file1, 0, SEEK_END);
+    fseek(file2, 0, SEEK_END);
+    fseek(file3, 0, SEEK_END);
+    fileSize1 = ftell(file1);
+    fileSize2 = ftell(file2);
+    fileSize3 = ftell(file3);
+    fseek(file1, 0, SEEK_SET);
+    fseek(file2, 0, SEEK_SET);
+    fseek(file3, 0, SEEK_SET);
+
+    fclose(file1);
+    fclose(file2);
+    fclose(file3);
+
     bool found1 = false;
     bool found2 = false;
     bool found3 = false;
-    std::string fileName1 = std::string(pn1) + ".bin";
-    std::string fileName2 = std::string(pn2) + ".bin";
-    std::string fileName3 = std::string(pn3) + ".bin";
+    std::string fileName1 = std::string(pn1) + std::string("_") + std::to_string(fileSize1) + ".bin";
+    std::string fileName2 = std::string(pn2) + std::string("_") + std::to_string(fileSize2) + ".bin";
+    std::string fileName3 = std::string(pn3) + std::string("_") + std::to_string(fileSize3) + ".bin";
     while ((de = readdir(dr)) != NULL)
     {
         if (de->d_type == DT_REG)
@@ -323,7 +357,17 @@ TEST_F(ImageManagerTest, GetImagePathTest)
     char *path = NULL;
     ASSERT_EQ(get_image_path(handler, pn, &path), IMAGE_OPERATION_OK);
 
-    std::string expectedPath = imageDir + "/" + pn + ".bin";
+    FILE *file = fopen("origin_images/load1.bin", "r");
+    ASSERT_NE(file, nullptr);
+
+    size_t fileSize = 0;
+    fseek(file, 0, SEEK_END);
+    fileSize = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    fclose(file);
+
+    std::string expectedPath = imageDir + "/" + pn + "_" + std::to_string(fileSize) + ".bin";
     ASSERT_STREQ(path, expectedPath.c_str());
 }
 

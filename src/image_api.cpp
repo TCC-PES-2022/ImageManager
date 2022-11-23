@@ -61,7 +61,7 @@ ImageOperationResult check_checksum(const char *path, bool *isValidChecksum)
         }
 
         fseek(fp, 0, SEEK_END);
-        if (ftell(fp) < (PN_SIZE + SHA256_SIZE))
+        if (ftell(fp) <= (PN_SIZE + SHA256_SIZE))
         {
             fclose(fp);
             return IMAGE_OPERATION_ERROR;

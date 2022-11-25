@@ -395,6 +395,12 @@ ImageOperationResult import_image(ImageHandlerPtr handler, const char *path, cha
             return IMAGE_OPERATION_ERROR;
         }
 
+        if (handler->image_map.find(pnStr) != handler->image_map.end() && handler->image_map[pnStr] != destPath)
+        {
+            // There is already an image with the same part number and a different path name, so we need to delete it.
+            unlink(handler->image_map[pnStr].c_str());
+        }
+
         handler->image_map[pnStr] = destPath;
 
         if (part_number != NULL)

@@ -331,7 +331,11 @@ TEST_F(ImageManagerTest, ImportMultipleCompatibilityFileTest)
     closedir(dr);
     ASSERT_TRUE(found);
 
-    // TODO: Assert if file was correctly merged
+    // Check if file was correctly merged
+    std::ifstream file(imageDir + "/" + fileName);
+    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    ASSERT_STREQ(content.c_str(), MERGED_COMPATIBILITY_CONTENT);
+
 }
 
 TEST_F(ImageManagerTest, ImportCorruptedCompatibilityFileTest)

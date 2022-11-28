@@ -185,6 +185,73 @@ TEST_F(ImageManagerTest, ImportCorruptedImageBinaryTest)
     ASSERT_EQ(pn, nullptr);
 }
 
+TEST_F(ImageManagerTest, ImportMultipleImageBinarySamePNTest)
+{
+    // TODO: Make it an array
+    char *pn1 = NULL;
+    char *pn2 = NULL;
+
+    ImageOperationResult result1 = import_image(handler, "origin_images/load1_100.bin", &pn1);
+    ImageOperationResult result2 = import_image(handler, "origin_images/load1_200.bin", &pn2);
+
+    ASSERT_EQ(result1, IMAGE_OPERATION_OK);
+    ASSERT_NE(pn1, nullptr);
+    ASSERT_STREQ(pn1, "00000001");
+
+    ASSERT_EQ(result2, IMAGE_OPERATION_OK);
+    ASSERT_NE(pn2, nullptr);
+    ASSERT_STREQ(pn2, "00000001");
+
+    // Check if file was imported
+    struct dirent *de;
+    DIR *dr = opendir(imageDir.c_str());
+
+    if (dr == NULL)
+    {
+        FAIL() << "Could not open " << imageDir << " directory";
+    }
+
+    FILE *file1 = fopen("origin_images/load1_100.bin", "r");
+    FILE *file2 = fopen("origin_images/load1_200.bin", "r");
+    ASSERT_NE(file1, nullptr);
+    ASSERT_NE(file2, nullptr);
+
+    size_t fileSize1 = 0;
+    size_t fileSize2 = 0;
+    fseek(file1, 0, SEEK_END);
+    fseek(file2, 0, SEEK_END);
+    fileSize1 = ftell(file1);
+    fileSize2 = ftell(file2);
+    fseek(file1, 0, SEEK_SET);
+    fseek(file2, 0, SEEK_SET);
+
+    fclose(file1);
+    fclose(file2);
+
+    bool found1 = false;
+    bool found2 = false;
+    std::string fileName1 = std::string(pn1) + std::string("_") + std::to_string(fileSize1) + ".bin";
+    std::string fileName2 = std::string(pn2) + std::string("_") + std::to_string(fileSize2) + ".bin";
+    while ((de = readdir(dr)) != NULL)
+    {
+        if (de->d_type == DT_REG)
+        {
+            if (strcmp(de->d_name, fileName1.c_str()) == 0)
+            {
+                found1 = true;
+            }
+            else if (strcmp(de->d_name, fileName2.c_str()) == 0)
+            {
+                found2 = true;
+            }
+        }
+    }
+
+    closedir(dr);
+    ASSERT_FALSE(found1);
+    ASSERT_TRUE(found2);
+}
+
 TEST_F(ImageManagerTest, ImportCompatibilityFileTest)
 {
     char *pn = NULL;
@@ -216,49 +283,6 @@ TEST_F(ImageManagerTest, ImportCompatibilityFileTest)
 
     closedir(dr);
     ASSERT_TRUE(found);
-}
-
-TEST_F(ImageManagerTest, ImportMultipleImagesSamePNTest)
-{
-    // TODO: Make it an array
-    char *pn1 = NULL;
-    char *pn2 = NULL;
-
-    ImageOperationResult result1 = import_image(handler, "origin_images/load1_100.bin", &pn1);
-    ImageOperationResult result2 = import_image(handler, "origin_images/load1_200.bin", &pn2);
-
-    ASSERT_EQ(result1, IMAGE_OPERATION_OK);
-    ASSERT_NE(pn1, nullptr);
-    ASSERT_STREQ(pn1, "00000001");
-
-    ASSERT_EQ(result2, IMAGE_OPERATION_OK);
-    ASSERT_NE(pn2, nullptr);
-    ASSERT_STREQ(pn2, "00000001");
-
-    // Check if file was imported
-    struct dirent *de;
-    DIR *dr = opendir(imageDir.c_str());
-
-    if (dr == NULL)
-    {
-        FAIL() << "Could not open " << imageDir << " directory";
-    }
-
-    bool found = false;
-    std::string fileName = std::string(COMPATIBILITY_FILE);
-    while ((de = readdir(dr)) != NULL)
-    {
-        if (de->d_type == DT_REG && strcmp(de->d_name, fileName.c_str()) == 0)
-        {
-            found = true;
-            break;
-        }
-    }
-
-    closedir(dr);
-    ASSERT_TRUE(found);
-
-    // TODO: Assert if file was correctly merged
 }
 
 TEST_F(ImageManagerTest, ImportMultipleCompatibilityFileTest)

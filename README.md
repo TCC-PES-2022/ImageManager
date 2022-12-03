@@ -1,6 +1,6 @@
 # ImageManager
 
-This is responsible for managing images and compatibility files.
+This is responsible for managing images and compatibility files. Check the [Documentation](https://tcc-pes-2022.github.io/ImageManager/)
 
 This repository is part of project [ARIEL](https://github.com/TCC-PES-2022).
 
